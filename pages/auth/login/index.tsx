@@ -1,7 +1,8 @@
 import { LoadingButton } from '@mui/lab'
-import { Alert, Container, Paper, Stack, TextField } from '@mui/material'
+import { Alert, Button, Container, Paper, Stack, TextField } from '@mui/material'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
+import { NextLink } from '../../../components/common/NextLink'
 import { useLoginMutation } from '../../../types/graphql'
 
 export default function Login() {
@@ -42,6 +43,9 @@ export default function Login() {
             <LoadingButton type="submit" loading={loading}>
               Login
             </LoadingButton>
+            <NextLink href="/auth/register">
+              <Button variant="text">Register</Button>
+            </NextLink>
           </Stack>
         </form>
       </Paper>
