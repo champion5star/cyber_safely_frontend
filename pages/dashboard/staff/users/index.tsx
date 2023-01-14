@@ -4,7 +4,7 @@ import { Button, Chip, Tooltip } from '@mui/material'
 import { GridColumns } from '@mui/x-data-grid'
 import { DataGridViewer, InferNodeType } from '../../../../components/common/DataGridViewer'
 import { SearchBar } from '../../../../components/common/SearchBar'
-import { withStaffDashboardLayout } from '../../../../components/dashboard/StaffLayout'
+import { withDashboardLayout } from '../../../../components/dashboard/Layout'
 import { roleDisplayTitle } from '../../../../helpers/formatters'
 import { namedOperations, Role, useInviteStaffMutation, UsersQuery, useUsersQuery } from '../../../../types/graphql'
 
@@ -90,6 +90,6 @@ function Users() {
   )
 }
 
-export default withStaffDashboardLayout(Users, {
+export default withDashboardLayout(Users, {
   title: 'Users',
 })
