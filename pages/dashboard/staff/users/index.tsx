@@ -2,7 +2,8 @@ import VerifiedIcon from '@mui/icons-material/Verified'
 import { Chip, Tooltip } from '@mui/material'
 import { GridColumns } from '@mui/x-data-grid'
 import { DataGridViewer, InferNodeType } from '../../../../components/common/DataGridViewer'
-import { withDashboardLayout } from '../../../../components/dashboard/layout'
+import { withStaffDashboardLayout } from '../../../../components/dashboard/StaffLayout'
+import { roleDisplayTitle } from '../../../../helpers/formatters'
 import { Role, UsersQuery, useUsersQuery } from '../../../../types/graphql'
 
 const columns: GridColumns<InferNodeType<UsersQuery['users']>> = [
@@ -40,7 +41,7 @@ const columns: GridColumns<InferNodeType<UsersQuery['users']>> = [
       return params.row.roles.map((e) => e.role)
     },
     renderCell(params) {
-      return params.value.map((role: Role) => <Chip label={roleDisplayTitle(role)} sx={{ mr: 0.5 }} />)
+      return params.value.map((role: Role) => <Chip key={role} label={roleDisplayTitle(role)} sx={{ mr: 0.5 }} />)
     },
   },
   {
@@ -52,19 +53,6 @@ const columns: GridColumns<InferNodeType<UsersQuery['users']>> = [
     },
   },
 ]
-
-function roleDisplayTitle(role: Role) {
-  switch (role) {
-    case 'STAFF':
-      return 'Staff'
-    case 'COACH':
-      return 'Coach'
-    case 'ATHLETE':
-      return 'Athlete'
-    case 'PARENT':
-      return 'Parent'
-  }
-}
 
 function Users() {
   const query = useUsersQuery()
@@ -80,6 +68,6 @@ function Users() {
   )
 }
 
-export default withDashboardLayout(Users, {
-  title: 'Staff Dashboard',
+export default withStaffDashboardLayout(Users, {
+  title: 'Users',
 })
