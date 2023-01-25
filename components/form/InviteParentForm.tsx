@@ -1,22 +1,21 @@
 import { Stack, TextField } from '@mui/material'
-import { forwardRef, useCallback, useImperativeHandle, useState } from 'react'
+import { forwardRef, useImperativeHandle } from 'react'
+import { z } from 'zod'
+import { useForm } from '../../helpers/form'
+
+const schema = z.object({
+  email: z.string().email(),
+  relation: z.string().optional(),
+})
 
 type InviteParentFormRefProps = {
-  onSubmit: () => {
-    email: string
-    relation: string
-  }
+  onSubmit: (callback: (value: z.infer<typeof schema>) => void) => void
 }
 
 export const InviteParentForm = forwardRef<InviteParentFormRefProps>(function Wrapped(props, ref) {
-  const [email, setEmail] = useState('')
-  const [relation, setRelation] = useState('')
+  const form = useForm(schema)
 
-  const onSubmit = useCallback(() => {
-    return { email, relation }
-  }, [email, relation])
-
-  useImperativeHandle(ref, () => ({ onSubmit }), [onSubmit])
+  useImperativeHandle(ref, () => ({ onSubmit: form.didSubmit }), [form.didSubmit])
 
   return (
     <Stack spacing={1}>
@@ -25,19 +24,23 @@ export const InviteParentForm = forwardRef<InviteParentFormRefProps>(function Wr
         autoFocus
         fullWidth
         type="email"
-        value={email}
         label="E-mail"
         margin="dense"
         variant="standard"
-        onChange={(e) => setEmail(e.target.value)}
+        error={form.hasError('email')}
+        value={form.value.email ?? ''}
+        helperText={form.getError('email')}
+        onChange={(e) => form.onChange({ email: e.target.value })}
       />
       <TextField
         fullWidth
         margin="dense"
         label="Relation"
-        value={relation}
         variant="standard"
-        onChange={(e) => setRelation(e.target.value)}
+        error={form.hasError('relation')}
+        value={form.value.relation ?? ''}
+        helperText={form.getError('relation')}
+        onChange={(e) => form.onChange({ relation: e.target.value })}
       />
     </Stack>
   )
