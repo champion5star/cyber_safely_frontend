@@ -1,6 +1,6 @@
 import CalendarIcon from '@mui/icons-material/CalendarMonthOutlined'
 import { Box, Grid, InputAdornment, MenuItem, Select, Stack, Typography } from '@mui/material'
-import 'chartjs-adapter-date-fns'
+
 import { useState } from 'react'
 import { CumulativeChartCard } from '../../../../components/chart/CumulativeChartCard'
 import { withDashboardLayout } from '../../../../components/dashboard/Layout'
@@ -80,4 +80,5 @@ function Home() {
 
 export default withDashboardLayout(Home, {
   title: 'Home',
+  maxWidth: 'lg',
 })
