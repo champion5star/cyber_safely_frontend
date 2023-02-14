@@ -1,7 +1,7 @@
-import { CircularProgress, Stack, Typography } from '@mui/material'
 import { GridColumns } from '@mui/x-data-grid'
 import { DataGridActions, DataGridViewer, InferNodeType } from '../../../../components/common/DataGridViewer'
 import { SearchBar } from '../../../../components/common/SearchBar'
+import { UserScore } from '../../../../components/common/UserScore'
 import { withDashboardLayout } from '../../../../components/dashboard/Layout'
 import { ChildrenQuery, SchoolRole, useChildrenQuery } from '../../../../types/graphql'
 
@@ -42,12 +42,7 @@ const columns: GridColumns<InferNodeType<ChildrenQuery['children']>> = [
     field: 'score',
     headerName: 'Score',
     renderCell() {
-      return (
-        <Stack spacing={1} direction="row" alignItems="center">
-          <CircularProgress color="success" size={20} variant="determinate" value={100} />
-          <Typography color="success.main">Good (100%)</Typography>
-        </Stack>
-      )
+      return <UserScore />
     },
   },
 ]
