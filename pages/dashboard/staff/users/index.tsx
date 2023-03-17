@@ -1,15 +1,13 @@
-import AddIcon from '@mui/icons-material/AddOutlined'
-import { Button } from '@mui/material'
+import { Link } from '@mui/material'
 import { GridColumns } from '@mui/x-data-grid'
 import { AvatarWithName } from '../../../../components/common/AvatarWithName'
 import { DataGridActions, DataGridViewer, InferNodeType } from '../../../../components/common/DataGridViewer'
+import { NextLink } from '../../../../components/common/NextLink'
 import { SearchBar } from '../../../../components/common/SearchBar'
 import { UserEmail } from '../../../../components/common/UserEmail'
 import { UserRoles } from '../../../../components/common/UserRoles'
 import { withDashboardLayout } from '../../../../components/dashboard/Layout'
-import { InviteUserForm } from '../../../../components/forms/InviteUserForm'
-import { namedOperations, useCreateUserRoleMutation, UsersQuery, useUsersQuery } from '../../../../schema'
-import { useAlert } from '../../../../utils/context/alert'
+import { UsersQuery, useUsersQuery } from '../../../../schema'
 
 const columns: GridColumns<InferNodeType<UsersQuery['users']>> = [
   {
@@ -32,9 +30,31 @@ const columns: GridColumns<InferNodeType<UsersQuery['users']>> = [
     },
   },
   {
+    width: 300,
+    field: 'school',
+    headerName: 'School',
+    valueGetter(params) {
+      return params.row.roles.map((e) => (e.__typename === 'SchoolRole' ? e.school : undefined)).filter((e) => !!e)
+    },
+    renderCell(params) {
+      return (
+        <>
+          {params.value.map((school: any, index: number, { length }: { length: number }) => (
+            <>
+              <NextLink href={'/dashboard/staff/schools/' + school.id}>
+                <Link>{school.name}</Link>
+              </NextLink>
+              {index < length - 1 && ', '}
+            </>
+          ))}
+        </>
+      )
+    },
+  },
+  {
     width: 350,
-    field: 'roles',
-    headerName: 'Roles',
+    field: 'role',
+    headerName: 'Role',
     valueGetter(params) {
       return params.row.roles
     },
@@ -53,12 +73,8 @@ const columns: GridColumns<InferNodeType<UsersQuery['users']>> = [
 ]
 
 function Users() {
-  const { pushAlert } = useAlert()
-
-  const query = useUsersQuery()
-
-  const [createUserRole] = useCreateUserRoleMutation({
-    refetchQueries: [namedOperations.Query.users],
+  const query = useUsersQuery({
+    variables: { filter: { roles: ['ADMIN', 'COACH', 'ATHLETE'] } },
   })
 
   return (
@@ -70,23 +86,6 @@ function Users() {
       initialSortModel={{ field: 'createdAt', sort: 'desc' }}
       actions={
         <DataGridActions>
-          <Button
-            fullWidth
-            startIcon={<AddIcon />}
-            onClick={() => {
-              pushAlert({
-                type: 'custom',
-                title: 'Invite Staff',
-                content: InviteUserForm,
-                props: { allow: ['STAFF'] },
-                result: ({ email }) => {
-                  createUserRole({ variables: { input: { email, type: 'STAFF' } } })
-                },
-              })
-            }}
-          >
-            Invite Staff
-          </Button>
           <SearchBar onSearch={(search) => query.refetch({ filter: { ...query.variables?.filter, search } })} />
         </DataGridActions>
       }
