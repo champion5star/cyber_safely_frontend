@@ -1,6 +1,8 @@
-import UploadIcon from '@mui/icons-material/UploadFileOutlined'
+import ArrowIcon from '@mui/icons-material/ArrowBackOutlined'
+import CheckIcon from '@mui/icons-material/CheckOutlined'
 import { LoadingButton } from '@mui/lab'
 import {
+  Button,
   CircularProgress,
   MenuItem,
   Select,
@@ -22,7 +24,7 @@ import {
   PreviewImportMutation,
   PreviewImportTypeEnum,
   namedOperations,
-  useImportAthletesAndParentsMutation,
+  useImportStudentsAndParentsMutation,
   usePreviewImportMutation,
 } from '../../schema'
 import { useAlert } from '../../utils/context/alert'
@@ -36,17 +38,23 @@ export const IMPORT_TYPES = {
 export const IMPORT_ACCEPT = Object.keys(IMPORT_TYPES).join(',')
 
 const schema = z.object({
-  athleteEmail: z.string().min(1),
+  studentEmail: z.string().min(1),
   parentEmail: z.string().min(1),
 })
 
-type InviteAthleteAndParentTableFormProps = {
+type InviteStudentAndParentTableFormProps = {
   schoolId: string
   file: File
   onSubmit: () => void
+  onClearFile?: () => void
 }
 
-export function InviteAthleteAndParentTableForm({ schoolId, file, onSubmit }: InviteAthleteAndParentTableFormProps) {
+export function InviteStudentAndParentTableForm({
+  schoolId,
+  file,
+  onSubmit,
+  onClearFile,
+}: InviteStudentAndParentTableFormProps) {
   const onSubmitRef = useCallbackRef(onSubmit)
 
   const { upload } = useUpload()
@@ -81,7 +89,7 @@ export function InviteAthleteAndParentTableForm({ schoolId, file, onSubmit }: In
         })
 
         setHeaderMap({
-          athleteEmail: data!.previewImport.headers[0],
+          studentEmail: data!.previewImport.headers[0],
           parentEmail: data!.previewImport.headers[1],
         })
       }
@@ -93,13 +101,13 @@ export function InviteAthleteAndParentTableForm({ schoolId, file, onSubmit }: In
     })
   }, [file])
 
-  const [importAthletesAndParents, { loading }] = useImportAthletesAndParentsMutation({
+  const [importStudentsAndParents, { loading }] = useImportStudentsAndParentsMutation({
     refetchQueries: [namedOperations.Query.users],
   })
 
   if (!data) {
     return (
-      <Stack alignItems="center">
+      <Stack alignItems="center" spacing={1}>
         <CircularProgress size={32} />
         <Typography color="text.secondary">Generating Preview...</Typography>
       </Stack>
@@ -108,15 +116,6 @@ export function InviteAthleteAndParentTableForm({ schoolId, file, onSubmit }: In
 
   return (
     <Stack>
-      <div>
-        <Typography variant="body2" color="text.secondary">
-          * You need to map which column should be used for Athlete E-mail and Parent E-mail.
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          * You can invite multiple parents to the same athlete by having duplicated rows of the same athlete and
-          different parents.
-        </Typography>
-      </div>
       <TableContainer>
         <Table
           sx={{
@@ -150,9 +149,9 @@ export function InviteAthleteAndParentTableForm({ schoolId, file, onSubmit }: In
                       }
                     }}
                   >
-                    <MenuItem value="-">Do not use "{header}" column</MenuItem>
-                    <MenuItem value="athleteEmail">Use "{header}" column as Athlete E-mail</MenuItem>
-                    <MenuItem value="parentEmail">Use "{header}" column as Parent E-mail</MenuItem>
+                    <MenuItem value="-">Do not use {header} column</MenuItem>
+                    <MenuItem value="studentEmail">Use {header} column as Student E-mail</MenuItem>
+                    <MenuItem value="parentEmail">Use {header} column as Parent E-mail</MenuItem>
                   </Select>
                 </TableCell>
               ))}
@@ -169,33 +168,37 @@ export function InviteAthleteAndParentTableForm({ schoolId, file, onSubmit }: In
           </TableBody>
         </Table>
       </TableContainer>
-      <LoadingButton
-        loading={loading}
-        startIcon={<UploadIcon />}
-        sx={{ alignSelf: 'flex-start' }}
-        onClick={async () => {
-          try {
-            const { athleteEmail, parentEmail } = schema.parse(headerMap)
-            const header = { athleteEmail, parentEmail }
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Button startIcon={<ArrowIcon />} variant="text" onClick={onClearFile}>
+          Pick Other File
+        </Button>
+        <LoadingButton
+          loading={loading}
+          endIcon={<CheckIcon />}
+          onClick={async () => {
+            try {
+              const { studentEmail, parentEmail } = schema.parse(headerMap)
+              const header = { studentEmail, parentEmail }
 
-            const { uploadId, type } = data
+              const { uploadId, type } = data
 
-            await importAthletesAndParents({
-              variables: { schoolId, input: { uploadId, type, header } },
-            })
+              await importStudentsAndParents({
+                variables: { schoolId, input: { uploadId, type, header } },
+              })
 
-            onSubmitRef.current()
-          } catch (error) {
-            if (error instanceof z.ZodError) {
-              pushError('Please select which headers should be mapped to the Athlete E-mail and Parent E-mail')
-            } else {
-              pushError(error)
+              onSubmitRef.current()
+            } catch (error) {
+              if (error instanceof z.ZodError) {
+                pushError('Please select which headers should be mapped to the Student E-mail and Parent E-mail')
+              } else {
+                pushError(error)
+              }
             }
-          }
-        }}
-      >
-        Import from File
-      </LoadingButton>
+          }}
+        >
+          Upload &amp; Invite
+        </LoadingButton>
+      </Stack>
     </Stack>
   )
 }

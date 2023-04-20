@@ -5,15 +5,14 @@ import { GridColumns } from '@mui/x-data-grid'
 import { LinkProps } from 'next/link'
 import { UsersQuery, useUsersQuery } from '../../schema'
 import { useAlert } from '../../utils/context/alert'
-import { useFilePicker } from '../../utils/upload'
 import { AvatarWithName } from '../common/AvatarWithName'
 import { ButtonSplitMenu } from '../common/ButtonSplitMenu'
 import { DataGridActions, DataGridViewer, InferNodeType } from '../common/DataGridViewer'
 import { PlatformChip } from '../common/PlatformChip'
 import { SearchBar } from '../common/SearchBar'
 import { UserScore } from '../common/UserScore'
-import { InviteAthleteAndParentForm } from '../forms/InviteAthleteAndParentForm'
-import { IMPORT_ACCEPT, InviteAthleteAndParentTableForm } from '../forms/InviteAthleteAndParentTableForm'
+import { InviteStudentAndParentForm } from '../forms/InviteStudentAndParentForm'
+import { ImportStudentsModal } from './ImportStudentsModal'
 
 const columns: GridColumns<InferNodeType<UsersQuery['users']>> = [
   {
@@ -72,15 +71,14 @@ const columns: GridColumns<InferNodeType<UsersQuery['users']>> = [
   },
 ]
 
-export function AthletesTable({ schoolId, href }: { schoolId: string; href?: (id: string) => LinkProps['href'] }) {
-  const { pick } = useFilePicker()
+export function StudentsTable({ schoolId, href }: { schoolId: string; href?: (id: string) => LinkProps['href'] }) {
   const { pushAlert } = useAlert()
 
   const query = useUsersQuery({
     variables: {
       filter: {
         from: 'SCHOOL',
-        roles: ['ATHLETE'],
+        roles: ['STUDENT'],
         fromId: schoolId,
       },
     },
@@ -89,7 +87,7 @@ export function AthletesTable({ schoolId, href }: { schoolId: string; href?: (id
   return (
     <DataGridViewer
       query={query}
-      title="Athletes"
+      title="Students"
       columns={columns}
       data={query.data?.users}
       href={href ? (e) => href(e.id) : undefined}
@@ -97,36 +95,32 @@ export function AthletesTable({ schoolId, href }: { schoolId: string; href?: (id
       actions={
         <DataGridActions>
           <ButtonSplitMenu
-            title="Invite Athlete"
+            title="Invite Student"
             startIcon={<AddIcon />}
             onClick={() => {
               pushAlert({
                 type: 'custom',
                 props: { schoolId },
-                title: 'Invite Athlete',
-                content: InviteAthleteAndParentForm,
+                title: 'Invite Student',
+                content: InviteStudentAndParentForm,
               })
             }}
           >
             <MenuItem
-              onClick={async () => {
-                const file = await pick(IMPORT_ACCEPT)
-
-                if (file) {
-                  pushAlert({
-                    type: 'custom',
-                    maxWidth: 'lg',
-                    title: 'Import from File',
-                    props: { schoolId, file },
-                    content: InviteAthleteAndParentTableForm,
-                  })
-                }
+              onClick={() => {
+                pushAlert({
+                  title: '',
+                  type: 'custom',
+                  maxWidth: 'lg',
+                  props: { schoolId },
+                  content: ImportStudentsModal,
+                })
               }}
             >
               <ListItemIcon>
                 <UploadIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText>Import from File...</ListItemText>
+              <ListItemText>Import from File</ListItemText>
             </MenuItem>
           </ButtonSplitMenu>
           <SearchBar onSearch={(search) => query.refetch({ filter: { ...query.variables?.filter, search } })} />
